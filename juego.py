@@ -992,7 +992,6 @@ def main():
         elif que_hacer == "juego":
 
             mapa_matriz = pickle.load(open(mapa,"rb"))
-            print(mapa_matriz)
 
             if algoritmo_1 == "A estrella":
                 alg1 = A_star
