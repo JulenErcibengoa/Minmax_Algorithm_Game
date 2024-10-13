@@ -22,13 +22,26 @@ height = grid_height
 botoien_dist = height // 10
 
 # Colores:
-WHITE = (238,238,210)
-BLACK = (186,202,68)
-GRID_COLOR = (200, 200, 200) # Karratuen arteko kolorea eta pantaila atzeko kolorea
+# WHITE = (238,238,210)
+# BLACK = (186,202,68)
+# GRID_COLOR = (200, 200, 200) # Karratuen arteko kolorea eta pantaila atzeko kolorea
+# TEXT_COLOR = (0,0,0)
+# BUTTON_COLOR = (200, 200, 200)
+# GREEN = (0, 255, 0)
+# RED =(255,0,0)
+
+WHITE = (110,172,218)
+BLACK = (3,52,110)
+GRID_COLOR = (0, 0, 0) # Karratuen arteko kolorea eta pantaila atzeko kolorea
 TEXT_COLOR = (0,0,0)
-BUTTON_COLOR = (200, 200, 200)
-GREEN = (0, 255, 0)
+TEXT_COLOR2 = (0,0,0)
+BUTTON_COLOR = (226, 226, 182)
+GREEN = (100, 255, 100)
 RED =(255,0,0)
+
+
+
+
 
 
 
@@ -362,7 +375,8 @@ def menu():
     pygame.display.set_caption("Pilla-Pilla")
 
     # Irudiak:
-    irudia = pygame.image.load("imagen_menu.png") 
+    directorio = os.path.dirname(os.path.realpath(__file__))
+    irudia = pygame.image.load(os.path.join(directorio, "imagen_menu.png")) 
     irudia = pygame.transform.scale(irudia, (botoien_dist * 4, botoien_dist*4))
     irudia_rect = irudia.get_rect()
     irudia_rect.center = (width // 2, height // 2 - botoien_dist* 1.5)
@@ -497,7 +511,8 @@ def crear_mapa():
                         if es_mapa_posible(mapa) and text.strip() != "":
                             mapa[0,0]= 0
                             mapa[n-1,n-1] = 0
-                            pickle.dump(mapa,open(text+".pkl","wb"))
+                            directorio = os.path.dirname(os.path.realpath(__file__))
+                            pickle.dump(mapa,open(os.path.join(directorio, text+".pkl"),"wb"))
                             mapa_incorrecto = False
                             running = False
                             zer_egin = "menu"
@@ -775,6 +790,25 @@ def juego(pilla_pilla):
         if pilla_pilla.modo_de_juego != "maquina vs maquina":
             if not pilla_pilla.modo_de_juego == pilla_pilla.turno: # Si no es el turno del jugador (cuando es el turno del jugador se maneja por pygame)
                 pilla_pilla.siguiente_movimiento()
+            else:
+                movimientos = [(0,1),(0,-1),(1,0),(-1,0)]
+                posible = False
+                if pilla_pilla.modo_de_juego == "perseguidor":
+                    for dx,dy in movimientos:
+                        if pilla_pilla.es_posible(pilla_pilla.posicion_perseguidor + np.array((dx,dy)), "perseguidor"):
+                            posible = True
+                            break
+                    if not posible:
+                        pilla_pilla.posicion_anterior_perseguidor = pilla_pilla.posicion_perseguidor
+                        pilla_pilla.turno = "perseguido"
+                else:
+                    for dx,dy in movimientos:
+                        if pilla_pilla.es_posible(pilla_pilla.posicion_perseguido + np.array((dx,dy)), "perseguido"):
+                            posible = True
+                            break
+                    if not posible:
+                        pilla_pilla.posicion_anterior_perseguido = pilla_pilla.posicion_perseguido
+                        pilla_pilla.turno = "perseguidor"
         else:
             if not pilla_pilla.juego_terminado:
                 pilla_pilla.siguiente_movimiento()
@@ -785,12 +819,21 @@ def juego(pilla_pilla):
     return zer_egin
 
 def conseguir_nombres_de_mapas():
-    direct = os.getcwd()
+    direct = os.path.dirname(os.path.realpath(__file__))
     archivos = os.listdir(direct)
+    print(archivos)
     lista_de_mapas = []
     for archivo in archivos:
         if archivo[-3:] == "pkl":
             lista_de_mapas.append(archivo)
+    print()
+    print()
+    print()
+    print()
+    print(lista_de_mapas)
+    print()
+    print()
+    print()
     return lista_de_mapas
 
 def dibujar_grid_ajustes(kuadrikula,screen):
@@ -834,7 +877,8 @@ def seleccionar_ajustes(mapa,modo_de_juego,algoritmo_1,profundidad_minmax,algori
     modos_de_juego = ["perseguidor","perseguido","maquina vs maquina"]
     i_modo_juego = modos_de_juego.index(modo_de_juego)
     i_mapas = mapas.index(mapa)
-    mapa_matriz = pickle.load(open(mapas[i_mapas],"rb"))
+    directorio = os.path.dirname(os.path.realpath(__file__))
+    mapa_matriz = pickle.load(open(os.path.join(directorio, mapas[i_mapas]),"rb"))
     algoritmos = ["A estrella", "distancia de manhattan", "distancia euclidea"]
     i_algoritmos_1 = algoritmos.index(algoritmo_1)
     i_algoritmos_2 = algoritmos.index(algoritmo_2)
@@ -877,7 +921,7 @@ def seleccionar_ajustes(mapa,modo_de_juego,algoritmo_1,profundidad_minmax,algori
     slider_4 = pygame_gui.elements.UIHorizontalSlider(
         relative_rect=pygame.Rect((50 + 15,10 + 70 + 7* botoien_distantzia + 10), (300, 20)),
         start_value=probabilidad_cambio_de_turno,  # Valor inicial del deslizador
-        value_range=(0,1),  # Rango de valores del deslizador
+        value_range=(0,100),  # Rango de valores del deslizador
         manager=manager)
     
 
@@ -897,7 +941,8 @@ def seleccionar_ajustes(mapa,modo_de_juego,algoritmo_1,profundidad_minmax,algori
                         i_modo_juego = (i_modo_juego + 1) % 3
                     elif botoia_mapaz_aldatu.rect.collidepoint(event.pos):
                         i_mapas = (i_mapas + 1) % len(mapas)
-                        mapa_matriz = pickle.load(open(mapas[i_mapas],"rb"))
+                        directorio = os.path.dirname(os.path.realpath(__file__))
+                        mapa_matriz = pickle.load(open(os.path.join(directorio, mapas[i_mapas]),"rb"))
                     elif botoia_algoritmoz_aldatu_1.rect.collidepoint(event.pos):
                         i_algoritmos_1 = (i_algoritmos_1 + 1) % len(algoritmos)
                     elif botoia_algoritmoz_aldatu_2.rect.collidepoint(event.pos):
@@ -908,25 +953,25 @@ def seleccionar_ajustes(mapa,modo_de_juego,algoritmo_1,profundidad_minmax,algori
         profundidad_minmax = round(slider_1.get_current_value())
         profundidad_minmax_2 = round(slider_2.get_current_value())
         imax = round(slider_3.get_current_value())
-        probabilidad_cambio_de_turno = round(slider_4.get_current_value(),2)
+        probabilidad_cambio_de_turno = round(slider_4.get_current_value() / 100,2)
         screen.fill(WHITE)
 
         # Mapa:
         dibujar_grid_ajustes(mapa_matriz,screen)
         
         # Textuak:
-        screen.blit(izenburua.render("Seleccionar ajustes del juego", True, (0,0,0)),(20, 20))
+        screen.blit(izenburua.render("Seleccionar ajustes del juego", True, TEXT_COLOR2),(20, 20))
         screen.blit(informacion.render(mapas[i_mapas],True,(34,139,34)),(50 + 190 + 15,10 + 70 ))
         screen.blit(informacion.render(modos_de_juego[i_modo_juego],True,(34,139,34)),(50 + 190 + 15,10 + 70 + botoien_distantzia))
         screen.blit(informacion.render(algoritmos[i_algoritmos_1],True,(34,139,34)),(50 + 190 + 15,10 + 70 + 2* botoien_distantzia))
-        screen.blit(informacion.render(f"Cambiar profundidad minmax:",True,(0,0,0)),(50 + 15, + 70 + 3* botoien_distantzia))
+        screen.blit(informacion.render(f"Cambiar profundidad minmax:",True,TEXT_COLOR2),(50 + 15, + 70 + 3* botoien_distantzia))
         screen.blit(informacion.render(f"{profundidad_minmax}",True,(34,139,34)),(50 + 15 + 310, + 70 + 3* botoien_distantzia))
         screen.blit(informacion.render(algoritmos[i_algoritmos_2],True,(34,139,34)),(50 + 190 + 15,10 + 70 + 4* botoien_distantzia))
-        screen.blit(informacion.render(f"Cambiar profundidad minmax 2:",True,(0,0,0)),(50 + 15, + 70 + 5* botoien_distantzia))
+        screen.blit(informacion.render(f"Cambiar profundidad minmax 2:",True,TEXT_COLOR2),(50 + 15, + 70 + 5* botoien_distantzia))
         screen.blit(informacion.render(f"{profundidad_minmax_2}",True,(34,139,34)),(50 + 35 + 310, + 70 + 5* botoien_distantzia))
-        screen.blit(informacion.render(f"Iteraciones maximas:",True,(0,0,0)),(50 + 15, + 70 + 6* botoien_distantzia))
+        screen.blit(informacion.render(f"Iteraciones maximas:",True,TEXT_COLOR2),(50 + 15, + 70 + 6* botoien_distantzia))
         screen.blit(informacion.render(f"{imax}",True,(34,139,34)),(50 + 35 + 310, + 70 + 6* botoien_distantzia))
-        screen.blit(informacion.render(f"Probabilidad cambio de turno:",True,(0,0,0)),(50 + 15, + 70 + 7* botoien_distantzia))
+        screen.blit(informacion.render(f"Probabilidad cambio de turno:",True,TEXT_COLOR2),(50 + 15, + 70 + 7* botoien_distantzia))
         screen.blit(informacion.render(f"{probabilidad_cambio_de_turno}",True,(34,139,34)),(50 + 35 + 310, + 70 + 7* botoien_distantzia))
         screen.blit(informacion.render(f"Hay poda = {hay_poda}", True,(34,139,34)),(50 + 190 + 15,10 + 70 + 8* botoien_distantzia))
 
@@ -957,11 +1002,11 @@ def main():
     mapa = "mapa_1.pkl"
     modo_de_juego = "perseguido"
     algoritmo_1 = "A estrella"
-    profundidad_minmax = 20
+    profundidad_minmax = 25
     algoritmo_2 = "distancia de manhattan"
     profundidad_minmax_2 = 10
     iteraciones_maximas = 200
-    probabilidad_cambio_de_turno = 0.05
+    probabilidad_cambio_de_turno = 0
     hay_poda = True
 
     pygame.init()
@@ -977,7 +1022,7 @@ def main():
         elif que_hacer == "ajustes":
             info = seleccionar_ajustes(mapa,modo_de_juego,algoritmo_1, profundidad_minmax, 
                                        algoritmo_2, profundidad_minmax_2, iteraciones_maximas, 
-                                       probabilidad_cambio_de_turno,hay_poda)
+                                       probabilidad_cambio_de_turno * 100,hay_poda)
             que_hacer = info[0]
             mapa = info[1]
             modo_de_juego = info[2]
@@ -986,12 +1031,14 @@ def main():
             algoritmo_2 = info[5]
             profundidad_minmax_2 =info[6]
             iteraciones_maximas =info[7]
-            probabilidad_cambio_de_turno = info[8]
+            probabilidad_cambio_de_turno = info[8] 
             hay_poda = info[9]
 
         elif que_hacer == "juego":
 
-            mapa_matriz = pickle.load(open(mapa,"rb"))
+            directorio = os.path.dirname(os.path.realpath(__file__))
+
+            mapa_matriz = pickle.load(open(os.path.join(directorio, mapa),"rb"))
 
             if algoritmo_1 == "A estrella":
                 alg1 = A_star
