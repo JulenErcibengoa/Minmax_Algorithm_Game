@@ -1,18 +1,20 @@
-# Minmax_Algorithm_Game
-Aplicación del algoritmo minmax con poda alfa-beta para un juego del estilo "pilla-pilla".
+# Algorithmic-Hide-and-Seek-
+Minmax algorithm applied to a simplified version of hide and seek. It uses the A star algorithm as evaluation function. The rules of the game are the following ones:
 
-Se trata del juego de "pilla-pilla", puedes elegir jugar como perseguidor o como perseguido. El nivel de dificultad, junto a otros muchos parámetros, los eliges tú.
+- The game is turn-based.
+- The seeker is the red player and the hider is the green one.
+- The seeker always plays first.
+- Players cannot return to the exact spot they moved from on the previous turn.
+- The game ends either when the seeker catches the hider or after 200 turns (100 turns per player).
 
-La dificultad varía dependiendo de la función de evaluación que se use: el algoritmo A estrella, la distancia de manhattan y la distancia euclidea (dificultad decreciente). Por otro lado, cuanta mayor profundidad tenga el algoritmo "minmax", mayor dificultad tendrá el juego.
+In order to play the game execute the "juego.py" file.
 
-El juego también incluye un modo de creación de mapas, sin embargo, hay tres mapas predefinidos: "mapa_1.pkl", "mapa_2.pkl" y "mapa_3.pkl". Además, puedes seleccionar el modo de juego "maquina vs  maquina" y ver cómo juegan dos algoritmos diferentes:
-- algoritmo1 = algoritmo del perseguidor
-- algoritmo2 = algoritmo del perseguido
 
-El juego tiene algunas reglas:
-- Es por turnos y siempre empieza el perseguidor
-- Las posiciones iniciales son siempre las mismas: las esquinas
-- Los jugadores no pueden atravesar muros
-- No se puede volver a la última casilla que has pisado
-- De vez en cuando (la probabilidad se cambia en los ajustes) al perseguidor se le dan turnos dobles
-- El juego acaba cuando un jugador esté al lado, encima o debajo del otro (no en las diagonales), o cuando se llegue a las iteraciones máximas (200 por defecto, se cambia en ajustes)
+## Customizable settings:
+
+- You can create personalized maps.
+- You can change the game mode: play as the hider, the seeker, or machine vs. machine.
+- You can choose the evaluation function for the opponent (algorithm 1) and set the depth at which the function is evaluated.
+- You can set the maximum number of game turns.
+- In machine vs. machine (MvsM) mode, algorithm 1 controls the seeker, and algorithm 2 controls the hider.
+- You can decide wether there is a probability (default = 0) for the seeker to repeat their turn or not
